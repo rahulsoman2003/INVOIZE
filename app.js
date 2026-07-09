@@ -1033,10 +1033,22 @@ function setupScrollControls() {
 }
 
 /**
+ * Helper to compute SHA-256 hash of a string using Web Crypto API
+ */
+async function getSHA256Hash(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+/**
  * Setup password gate authentication control
  */
 function setupAuthentication() {
-    const SECRET_PASSWORD = 'rahul123'; // Default password - feel free to edit this string!
+    // SHA-256 hash of 'rahul123'. To change the password, generate a new SHA-256 hash and paste it below.
+    const SECRET_PASSWORD_HASH = '687f6da20de59091e67f594827cdee268125feb3aed1c3bad77d0f6761eb198a';
 
     // Clean up old localStorage key if present
     localStorage.removeItem('invoize_authenticated');
@@ -1064,9 +1076,10 @@ function setupAuthentication() {
 
     // Form submit listener
     if (DOM.loginForm) {
-        DOM.loginForm.addEventListener('submit', (e) => {
+        DOM.loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (DOM.loginPassword.value === SECRET_PASSWORD) {
+            const inputHash = await getSHA256Hash(DOM.loginPassword.value);
+            if (inputHash === SECRET_PASSWORD_HASH) {
                 sessionStorage.setItem('invoize_authenticated', 'true');
                 
                 // Animate login screen fade out
