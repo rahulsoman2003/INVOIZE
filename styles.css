@@ -1516,7 +1516,6 @@ textarea {
 .login-screen.transition-out {
     display: flex !important;
     opacity: 0;
-    visibility: hidden;
     pointer-events: none;
 }
 
