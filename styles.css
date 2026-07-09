@@ -1348,7 +1348,7 @@ textarea {
     justify-content: center;
     z-index: 10000;
     overflow: hidden;
-    transition: opacity 0.4s ease, visibility 0.4s ease;
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
     /* Force dark-mode variables inside the login screen */
     --text-primary: #f3f4f6;
@@ -1381,6 +1381,7 @@ textarea {
     text-align: center;
     z-index: 5;
     animation: loginFadeIn 0.5s ease-out;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes loginFadeIn {
@@ -1497,14 +1498,28 @@ textarea {
 
 /* App Container wrapper utility */
 .app-container {
-    transition: opacity 0.4s ease;
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+    transform: scale(1) translateY(0);
 }
 
-.app-container.hidden,
+.app-container.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.97) translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
 .login-screen.hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+}
+
+.login-screen.hidden .login-card {
+    transform: scale(0.9) translateY(-30px);
+    opacity: 0;
+    filter: blur(5px);
 }
 
 /* Floating Background Shapes */
