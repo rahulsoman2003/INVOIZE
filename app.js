@@ -127,7 +127,7 @@ const DOM = {
     previewDate: document.getElementById('preview-date-section'),
     previewNotesSection: document.getElementById('preview-notes-section'),
     previewSignatureSection: document.getElementById('preview-signature-section'),
-    
+
     // Scroll controls
     scrollControls: document.getElementById('preview-scroll-controls'),
     btnScrollUp: document.getElementById('btn-scroll-up'),
@@ -653,7 +653,7 @@ function downloadPDF() {
                 pdf.setFontSize(9);
                 pdf.setTextColor(100, 116, 139); // Slate 500 (#64748b)
                 pdf.setFont('helvetica', 'normal');
-                
+
                 const pageText = `Page ${i} of ${totalPages}`;
                 pdf.text(pageText, pdf.internal.pageSize.getWidth() - 1.2, pdf.internal.pageSize.getHeight() - 0.5);
             }
@@ -904,7 +904,7 @@ function updateSectionTogglesUI() {
 function updateScrollButtonsVisibility() {
     const previewPane = document.querySelector('.preview-pane');
     if (!previewPane || !DOM.scrollControls) return;
-    
+
     // Show buttons if scrollable content exceeds visible viewport
     if (previewPane.scrollHeight > previewPane.clientHeight + 50) {
         DOM.scrollControls.classList.remove('hidden');
@@ -919,15 +919,15 @@ function updateScrollButtonsVisibility() {
 function setupScrollControls() {
     const previewPane = document.querySelector('.preview-pane');
     if (!previewPane || !DOM.btnScrollUp || !DOM.btnScrollDown) return;
-    
+
     DOM.btnScrollUp.addEventListener('click', () => {
         previewPane.scrollTo({ top: 0, behavior: 'smooth' });
     });
-    
+
     DOM.btnScrollDown.addEventListener('click', () => {
         previewPane.scrollTo({ top: previewPane.scrollHeight, behavior: 'smooth' });
     });
-    
+
     previewPane.addEventListener('scroll', updateScrollButtonsVisibility);
 }
 
@@ -935,7 +935,7 @@ function setupScrollControls() {
  * Setup password gate authentication control
  */
 function setupAuthentication() {
-    const SECRET_PASSWORD = 'reju123'; // Default password - feel free to edit this string!
+    const SECRET_PASSWORD = 'rahul123'; // Default password - feel free to edit this string!
 
     // Check existing login status
     if (localStorage.getItem('invoize_authenticated') === 'true') {
@@ -966,7 +966,7 @@ function setupAuthentication() {
                 localStorage.setItem('invoize_authenticated', 'true');
                 if (DOM.loginScreen) DOM.loginScreen.classList.add('hidden');
                 if (DOM.appContainer) DOM.appContainer.classList.remove('hidden');
-                
+
                 // Redraw zoom factor to fit content
                 setTimeout(updatePreviewZoom, 100);
             } else {
@@ -977,7 +977,7 @@ function setupAuthentication() {
                     DOM.loginError.offsetHeight; /* trigger reflow */
                     DOM.loginError.style.animation = '';
                 }
-                
+
                 DOM.loginPassword.value = '';
                 DOM.loginPassword.focus();
             }
@@ -1000,19 +1000,19 @@ function initLoginCanvas() {
     const canvas = DOM.loginCanvas;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    
+
     let particles = [];
-    const particleCount = 45; 
+    const particleCount = 45;
     const connectionDistance = 110;
-    
+
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     }
-    
+
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-    
+
     // Create particles
     for (let i = 0; i < particleCount; i++) {
         particles.push({
@@ -1023,7 +1023,7 @@ function initLoginCanvas() {
             radius: Math.random() * 2 + 1
         });
     }
-    
+
     function draw() {
         if (DOM.loginScreen && DOM.loginScreen.classList.contains('hidden')) {
             // Stop updating canvas once the app is unlocked to conserve CPU/battery
@@ -1031,35 +1031,35 @@ function initLoginCanvas() {
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         const theme = document.documentElement.getAttribute('data-theme') || 'light';
         // Accent adaptive colors
         const particleColor = theme === 'dark' ? 'rgba(14, 165, 233, 0.25)' : 'rgba(2, 132, 199, 0.15)';
         const lineColor = theme === 'dark' ? 'rgba(14, 165, 233, 0.1)' : 'rgba(2, 132, 199, 0.05)';
-        
+
         particles.forEach(p => {
             p.x += p.vx;
             p.y += p.vy;
-            
+
             // Loop boundaries
             if (p.x < 0) p.x = canvas.width;
             if (p.x > canvas.width) p.x = 0;
             if (p.y < 0) p.y = canvas.height;
             if (p.y > canvas.height) p.y = 0;
-            
+
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.fillStyle = particleColor;
             ctx.fill();
         });
-        
+
         // Draw connection lines
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
                 const dy = particles[i].y - particles[j].y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                
+
                 if (dist < connectionDistance) {
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
@@ -1070,10 +1070,10 @@ function initLoginCanvas() {
                 }
             }
         }
-        
+
         requestAnimationFrame(draw);
     }
-    
+
     draw();
 }
 
