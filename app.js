@@ -1039,7 +1039,7 @@ function setupAuthentication() {
     const SECRET_PASSWORD = 'rahul123'; // Default password - feel free to edit this string!
 
     // Check existing login status
-    if (localStorage.getItem('invoize_authenticated') === 'true') {
+    if (sessionStorage.getItem('invoize_authenticated') === 'true') {
         if (DOM.loginScreen) DOM.loginScreen.classList.add('hidden');
         if (DOM.appContainer) DOM.appContainer.classList.remove('hidden');
     } else {
@@ -1064,7 +1064,7 @@ function setupAuthentication() {
         DOM.loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             if (DOM.loginPassword.value === SECRET_PASSWORD) {
-                localStorage.setItem('invoize_authenticated', 'true');
+                sessionStorage.setItem('invoize_authenticated', 'true');
                 if (DOM.loginScreen) DOM.loginScreen.classList.add('hidden');
                 if (DOM.appContainer) DOM.appContainer.classList.remove('hidden');
 
@@ -1088,7 +1088,7 @@ function setupAuthentication() {
     // Logout / Lock application handler
     if (DOM.btnLogout) {
         DOM.btnLogout.addEventListener('click', () => {
-            localStorage.removeItem('invoize_authenticated');
+            sessionStorage.removeItem('invoize_authenticated');
             location.reload(); // Lock immediately by reloading
         });
     }
