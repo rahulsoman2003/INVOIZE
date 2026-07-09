@@ -1038,6 +1038,9 @@ function setupScrollControls() {
 function setupAuthentication() {
     const SECRET_PASSWORD = 'rahul123'; // Default password - feel free to edit this string!
 
+    // Clean up old localStorage key if present
+    localStorage.removeItem('invoize_authenticated');
+
     // Check existing login status
     if (sessionStorage.getItem('invoize_authenticated') === 'true') {
         if (DOM.loginScreen) DOM.loginScreen.classList.add('hidden');
