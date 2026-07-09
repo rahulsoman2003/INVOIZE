@@ -1502,7 +1502,7 @@ textarea {
     transform: scale(1) translateY(0);
 }
 
-.app-container.hidden {
+.app-container.locked-state {
     display: block !important;
     height: 0;
     overflow: hidden;
@@ -1513,14 +1513,14 @@ textarea {
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 }
 
-.login-screen.hidden {
+.login-screen.transition-out {
     display: flex !important;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
 }
 
-.login-screen.hidden .login-card {
+.login-screen.transition-out .login-card {
     transform: scale(0.9) translateY(-30px);
     opacity: 0;
     filter: blur(5px);

@@ -1044,10 +1044,10 @@ function setupAuthentication() {
     // Check existing login status
     if (sessionStorage.getItem('invoize_authenticated') === 'true') {
         if (DOM.loginScreen) DOM.loginScreen.classList.add('hidden');
-        if (DOM.appContainer) DOM.appContainer.classList.remove('hidden');
+        if (DOM.appContainer) DOM.appContainer.classList.remove('locked-state');
     } else {
         if (DOM.loginScreen) DOM.loginScreen.classList.remove('hidden');
-        if (DOM.appContainer) DOM.appContainer.classList.add('hidden');
+        if (DOM.appContainer) DOM.appContainer.classList.add('locked-state');
     }
 
     // Toggle password eye visibility
@@ -1068,8 +1068,24 @@ function setupAuthentication() {
             e.preventDefault();
             if (DOM.loginPassword.value === SECRET_PASSWORD) {
                 sessionStorage.setItem('invoize_authenticated', 'true');
-                if (DOM.loginScreen) DOM.loginScreen.classList.add('hidden');
-                if (DOM.appContainer) DOM.appContainer.classList.remove('hidden');
+                
+                // Animate login screen fade out
+                if (DOM.loginScreen) {
+                    DOM.loginScreen.classList.add('transition-out');
+                }
+                
+                // Animate app container fade in
+                if (DOM.appContainer) {
+                    DOM.appContainer.classList.remove('locked-state');
+                }
+
+                // Hide login overlay completely when fade out transition completes
+                setTimeout(() => {
+                    if (DOM.loginScreen) {
+                        DOM.loginScreen.classList.add('hidden');
+                        DOM.loginScreen.classList.remove('transition-out');
+                    }
+                }, 750);
 
                 // Redraw zoom factor to fit content
                 setTimeout(updatePreviewZoom, 100);
