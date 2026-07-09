@@ -26,11 +26,14 @@ let state = {
     items: [],
     discountType: 'percentage',
     discountValue: 0,
+    gstType: 'cgst_sgst',
+    gstRate: 0,
     notes: '',
     showBusinessContact: true,
     showCustomer: true,
     showDate: true,
     showDiscount: true,
+    showGst: true,
     showNotes: true,
     showSignature: true
 };
@@ -77,6 +80,8 @@ const DOM = {
     // Taxes & Discounts Inputs
     discountType: document.getElementById('invoice-discount-type'),
     discountValue: document.getElementById('invoice-discount-value'),
+    gstType: document.getElementById('invoice-gst-type'),
+    gstRate: document.getElementById('invoice-gst-rate'),
     invoiceNotes: document.getElementById('invoice-notes'),
 
     previewBusinessName: document.getElementById('preview-business-name'),
@@ -101,6 +106,20 @@ const DOM = {
     previewDiscountRow: document.getElementById('preview-discount-row'),
     previewDiscountLabel: document.getElementById('preview-discount-label'),
     previewDiscount: document.getElementById('preview-discount'),
+    previewTaxableRow: document.getElementById('preview-taxable-row'),
+    previewTaxable: document.getElementById('preview-taxable'),
+    previewCgstRow: document.getElementById('preview-cgst-row'),
+    previewCgstLabel: document.getElementById('preview-cgst-label'),
+    previewCgst: document.getElementById('preview-cgst'),
+    previewSgstRow: document.getElementById('preview-sgst-row'),
+    previewSgstLabel: document.getElementById('preview-sgst-label'),
+    previewSgst: document.getElementById('preview-sgst'),
+    previewIgstRow: document.getElementById('preview-igst-row'),
+    previewIgstLabel: document.getElementById('preview-igst-label'),
+    previewIgst: document.getElementById('preview-igst'),
+    previewSingleGstRow: document.getElementById('preview-single-gst-row'),
+    previewSingleGstLabel: document.getElementById('preview-single-gst-label'),
+    previewSingleGst: document.getElementById('preview-single-gst'),
     previewGrandTotal: document.getElementById('preview-grand-total'),
     previewAmountWords: document.getElementById('preview-amount-words'),
     previewNotes: document.getElementById('preview-notes'),
@@ -110,6 +129,7 @@ const DOM = {
     toggleCustomer: document.getElementById('toggle-section-customer'),
     toggleDate: document.getElementById('toggle-section-date'),
     toggleDiscount: document.getElementById('toggle-section-discount'),
+    toggleGst: document.getElementById('toggle-section-gst'),
     toggleNotes: document.getElementById('toggle-section-notes'),
     toggleSignature: document.getElementById('toggle-section-signature'),
 
@@ -118,6 +138,7 @@ const DOM = {
     cardCustomer: document.getElementById('card-customer'),
     cardDate: document.getElementById('card-date'),
     cardDiscount: document.getElementById('card-discount'),
+    cardGst: document.getElementById('card-gst'),
     cardNotes: document.getElementById('card-notes'),
     cardSignature: document.getElementById('card-signature'),
 
@@ -263,6 +284,8 @@ function syncInputsToState() {
 
     state.discountType = DOM.discountType.value;
     state.discountValue = parseFloat(DOM.discountValue.value) || 0;
+    state.gstType = DOM.gstType.value;
+    state.gstRate = parseFloat(DOM.gstRate.value) || 0;
     state.notes = DOM.invoiceNotes.value;
 }
 
@@ -283,6 +306,8 @@ function syncStateToInputs() {
 
     DOM.discountType.value = state.discountType;
     DOM.discountValue.value = state.discountValue;
+    DOM.gstType.value = state.gstType;
+    DOM.gstRate.value = state.gstRate;
     DOM.invoiceNotes.value = state.notes;
 
     updateSectionTogglesUI();
@@ -321,7 +346,29 @@ function calculateInvoice() {
 
     // 3. Final calculations
     const activeDiscount = state.showDiscount ? discountAmount : 0;
-    const grandTotal = subtotal - activeDiscount;
+    const taxableAmount = Math.max(0, subtotal - activeDiscount);
+
+    let gstAmount = 0;
+    let cgstAmount = 0;
+    let sgstAmount = 0;
+    let igstAmount = 0;
+    let singleGstAmount = 0;
+
+    const activeGstRate = state.showGst ? state.gstRate : 0;
+
+    if (activeGstRate > 0) {
+        gstAmount = taxableAmount * (activeGstRate / 100);
+        if (state.gstType === 'cgst_sgst') {
+            cgstAmount = gstAmount / 2;
+            sgstAmount = gstAmount / 2;
+        } else if (state.gstType === 'igst') {
+            igstAmount = gstAmount;
+        } else {
+            singleGstAmount = gstAmount;
+        }
+    }
+
+    const grandTotal = taxableAmount + gstAmount;
 
     // 4. Update preview variables
     DOM.previewGrandTotal.textContent = formatCurrency(grandTotal);
@@ -333,6 +380,52 @@ function calculateInvoice() {
         DOM.previewDiscountLabel.textContent = state.discountType === 'percentage' ? `(${state.discountValue}%)` : '';
     } else {
         DOM.previewDiscountRow.classList.add('hidden');
+    }
+
+    // Show taxable value row if discount is active AND GST rate is active > 0
+    if (state.showGst && activeGstRate > 0 && discountAmount > 0) {
+        DOM.previewTaxableRow.classList.remove('hidden');
+        DOM.previewTaxable.textContent = formatCurrency(taxableAmount);
+    } else {
+        DOM.previewTaxableRow.classList.add('hidden');
+    }
+
+    // Show GST rows based on type
+    if (state.showGst && activeGstRate > 0) {
+        if (state.gstType === 'cgst_sgst') {
+            DOM.previewCgstRow.classList.remove('hidden');
+            DOM.previewCgstLabel.textContent = `(${activeGstRate / 2}%)`;
+            DOM.previewCgst.textContent = formatCurrency(cgstAmount);
+
+            DOM.previewSgstRow.classList.remove('hidden');
+            DOM.previewSgstLabel.textContent = `(${activeGstRate / 2}%)`;
+            DOM.previewSgst.textContent = formatCurrency(sgstAmount);
+
+            DOM.previewIgstRow.classList.add('hidden');
+            DOM.previewSingleGstRow.classList.add('hidden');
+        } else if (state.gstType === 'igst') {
+            DOM.previewCgstRow.classList.add('hidden');
+            DOM.previewSgstRow.classList.add('hidden');
+
+            DOM.previewIgstRow.classList.remove('hidden');
+            DOM.previewIgstLabel.textContent = `(${activeGstRate}%)`;
+            DOM.previewIgst.textContent = formatCurrency(igstAmount);
+
+            DOM.previewSingleGstRow.classList.add('hidden');
+        } else {
+            DOM.previewCgstRow.classList.add('hidden');
+            DOM.previewSgstRow.classList.add('hidden');
+            DOM.previewIgstRow.classList.add('hidden');
+
+            DOM.previewSingleGstRow.classList.remove('hidden');
+            DOM.previewSingleGstLabel.textContent = `(${activeGstRate}%)`;
+            DOM.previewSingleGst.textContent = formatCurrency(singleGstAmount);
+        }
+    } else {
+        DOM.previewCgstRow.classList.add('hidden');
+        DOM.previewSgstRow.classList.add('hidden');
+        DOM.previewIgstRow.classList.add('hidden');
+        DOM.previewSingleGstRow.classList.add('hidden');
     }
 }
 
@@ -703,11 +796,14 @@ function clearForm() {
         items: [],
         discountType: 'percentage',
         discountValue: 0,
+        gstType: 'cgst_sgst',
+        gstRate: 0,
         notes: '',
         showBusinessContact: true,
         showCustomer: true,
         showDate: true,
         showDiscount: true,
+        showGst: true,
         showNotes: true,
         showSignature: true
     };
@@ -768,11 +864,14 @@ function loadSampleData() {
 
     state.discountType = 'percentage';
     state.discountValue = 5; // 5% discount
+    state.gstType = 'cgst_sgst';
+    state.gstRate = 18;
     state.notes = 'Payment Terms: Please pay via bank transfer to Apex Tech Solutions.\nHDFC Bank, Branch: BKC Mumbai, A/C: 50200012345678, IFSC: HDFC0000123.\nInterest at 12% p.a. charged after the due date.';
     state.showBusinessContact = true;
     state.showCustomer = true;
     state.showDate = true;
     state.showDiscount = true;
+    state.showGst = true;
     state.showNotes = true;
     state.showSignature = true;
 
@@ -837,7 +936,7 @@ function wireInputListeners() {
         DOM.businessPhone, DOM.businessEmail, DOM.businessGstin,
         DOM.customerName, DOM.customerAddress, DOM.customerPhone, DOM.customerGstin,
         DOM.invoiceDate,
-        DOM.discountType, DOM.discountValue, DOM.invoiceNotes
+        DOM.discountType, DOM.discountValue, DOM.gstType, DOM.gstRate, DOM.invoiceNotes
     ];
 
     inputElements.forEach(element => {
@@ -854,6 +953,7 @@ function setupSectionToggles() {
         { key: 'showCustomer', btn: DOM.toggleCustomer },
         { key: 'showDate', btn: DOM.toggleDate },
         { key: 'showDiscount', btn: DOM.toggleDiscount },
+        { key: 'showGst', btn: DOM.toggleGst },
         { key: 'showNotes', btn: DOM.toggleNotes },
         { key: 'showSignature', btn: DOM.toggleSignature }
     ];
@@ -878,6 +978,7 @@ function updateSectionTogglesUI() {
         { key: 'showCustomer', btn: DOM.toggleCustomer, card: DOM.cardCustomer },
         { key: 'showDate', btn: DOM.toggleDate, card: DOM.cardDate },
         { key: 'showDiscount', btn: DOM.toggleDiscount, card: DOM.cardDiscount },
+        { key: 'showGst', btn: DOM.toggleGst, card: DOM.cardGst },
         { key: 'showNotes', btn: DOM.toggleNotes, card: DOM.cardNotes },
         { key: 'showSignature', btn: DOM.toggleSignature, card: DOM.cardSignature }
     ];

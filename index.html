@@ -248,6 +248,33 @@
                         </div>
                     </div>
 
+                    <!-- Section: GST / Taxes -->
+                    <div class="form-card" id="card-gst">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fa-solid fa-percent"></i></div>
+                            <h2>GST / Tax Details</h2>
+                            <button type="button" class="btn-section-toggle" id="toggle-section-gst" title="Toggle GST on bill">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="invoice-gst-type">GST Type</label>
+                                    <select id="invoice-gst-type">
+                                        <option value="cgst_sgst">CGST + SGST (Split)</option>
+                                        <option value="igst">IGST (Single Row)</option>
+                                        <option value="single">Single GST (No Split)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="invoice-gst-rate">GST Rate (%)</label>
+                                    <input type="number" id="invoice-gst-rate" min="0" max="100" step="any" value="18">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Section: Notes & Terms -->
                     <div class="form-card" id="card-notes">
                         <div class="card-header">
@@ -364,6 +391,26 @@
                                     <tr id="preview-discount-row" class="table-summary-row hidden">
                                         <td colspan="3" class="text-right">Discount <span id="preview-discount-label"></span>:</td>
                                         <td class="text-right" id="preview-discount">-₹0.00</td>
+                                    </tr>
+                                    <tr id="preview-taxable-row" class="table-summary-row hidden">
+                                        <td colspan="3" class="text-right">Taxable Value:</td>
+                                        <td class="text-right" id="preview-taxable">₹0.00</td>
+                                    </tr>
+                                    <tr id="preview-cgst-row" class="table-summary-row hidden">
+                                        <td colspan="3" class="text-right">CGST <span id="preview-cgst-label"></span>:</td>
+                                        <td class="text-right" id="preview-cgst">₹0.00</td>
+                                    </tr>
+                                    <tr id="preview-sgst-row" class="table-summary-row hidden">
+                                        <td colspan="3" class="text-right">SGST <span id="preview-sgst-label"></span>:</td>
+                                        <td class="text-right" id="preview-sgst">₹0.00</td>
+                                    </tr>
+                                    <tr id="preview-igst-row" class="table-summary-row hidden">
+                                        <td colspan="3" class="text-right">IGST <span id="preview-igst-label"></span>:</td>
+                                        <td class="text-right" id="preview-igst">₹0.00</td>
+                                    </tr>
+                                    <tr id="preview-single-gst-row" class="table-summary-row hidden">
+                                        <td colspan="3" class="text-right">GST <span id="preview-single-gst-label"></span>:</td>
+                                        <td class="text-right" id="preview-single-gst">₹0.00</td>
                                     </tr>
                                     <tr class="table-grand-total-row">
                                         <td colspan="3" class="text-right">Grand Total:</td>
