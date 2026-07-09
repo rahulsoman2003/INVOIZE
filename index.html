@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Invoice PDF Generator</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- html2pdf.js Bundle CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <!-- Login Screen Overlay -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <canvas id="login-canvas" class="login-canvas"></canvas>
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <h2>Invoize <span class="brand-by">by Rahul S</span></h2>
+            <p>Please enter the password to access the app</p>
+            
+            <form id="login-form">
+                <div class="form-group password-group">
+                    <input type="password" id="login-password" placeholder="Enter password..." required autocomplete="current-password">
+                    <button type="button" id="btn-toggle-password" class="btn-toggle-password" title="Show/Hide Password">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+                <div id="login-error" class="login-error hidden">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Incorrect password
+                </div>
+                <button type="submit" class="btn btn-primary btn-login">
+                    <span>Unlock App</span>
+                    <i class="fa-solid fa-lock-open"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-container" class="app-container hidden">
+        <!-- App Header -->
+        <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <div>
+                    <h1>Invoize <span class="brand-by">by Rahul S</span></h1>
+                    <p>Generate professional A4 invoice PDFs instantly</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button id="btn-sample" class="btn btn-secondary" title="Populate form with sample data">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Sample Data</span>
+                </button>
+                <button id="btn-clear" class="btn btn-secondary" title="Clear all input fields">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Clear Form</span>
+                </button>
+                <button id="theme-toggle" class="btn btn-icon" title="Toggle Light/Dark Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button id="btn-logout" class="btn btn-icon" title="Lock App">
+                    <i class="fa-solid fa-lock"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Tabs (Only visible on mobile) -->
+    <nav class="mobile-tabs">
+        <button id="tab-edit" class="tab-btn active">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Edit Form</span>
+        </button>
+        <button id="tab-preview" class="tab-btn">
+            <i class="fa-solid fa-eye"></i>
+            <span>Live Preview</span>
+        </button>
+    </nav>
+
+    <!-- Main Content Layout -->
+    <main class="main-layout">
+        <!-- Left Pane: Editor Form -->
+        <section id="editor-pane" class="editor-pane active-panel">
+            <div class="pane-content">
+                <form id="invoice-form" onsubmit="event.preventDefault();">
+
+                    <!-- Section: Business Information -->
+                    <div class="form-card" id="card-business">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fa-solid fa-briefcase"></i></div>
+                            <h2>Business Details</h2>
+                            <button type="button" class="btn-section-toggle" id="toggle-section-business" title="Toggle business details on bill">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="business-phone">Phone Number <span class="required">*</span></label>
+                                    <input type="tel" id="business-phone" placeholder="e.g., +91 98765 43210" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="business-email">Email (Optional)</label>
+                                    <input type="email" id="business-email" placeholder="e.g., accounts@apex.com">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="business-gstin">GSTIN / Tax ID (Optional)</label>
+                                <input type="text" id="business-gstin" placeholder="e.g., 27AAAAA1111A1Z1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Customer Information -->
+                    <div class="form-card" id="card-customer">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fa-solid fa-user-tie"></i></div>
+                            <h2>Bill To (Customer Details)</h2>
+                            <button type="button" class="btn-section-toggle" id="toggle-section-customer" title="Toggle customer details on bill">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="customer-name">Customer Name <span class="required">*</span></label>
+                                <input type="text" id="customer-name" placeholder="e.g., Rohan Sharma" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-address">Customer Address <span class="required">*</span></label>
+                                <textarea id="customer-address" rows="3"
+                                    placeholder="e.g., Flat 4B, Greenfield Apartments, Sector 12, Pune"
+                                    required></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="customer-phone">Phone Number <span class="required">*</span></label>
+                                    <input type="tel" id="customer-phone" placeholder="e.g., +91 91234 56789" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="customer-gstin">GSTIN (Optional)</label>
+                                    <input type="text" id="customer-gstin" placeholder="e.g., 27BBBBB2222B2Z2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Invoice Information -->
+                    <div class="form-card" id="card-date">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                            <h2>Invoice Information</h2>
+                            <button type="button" class="btn-section-toggle" id="toggle-section-date" title="Toggle invoice details on bill">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="invoice-date">Invoice Date <span class="required">*</span></label>
+                                <input type="date" id="invoice-date" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Invoice Items -->
+                    <div class="form-card">
+                        <div class="card-header header-with-action">
+                            <div class="card-title-combo">
+                                <div class="card-icon"><i class="fa-solid fa-list-check"></i></div>
+                                <h2>Invoice Items</h2>
+                            </div>
+                            <button id="btn-add-item" type="button" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-plus"></i> Add Item
+                            </button>
+                        </div>
+                        <div class="card-body no-padding">
+                            <div class="table-scroll-container">
+                                <table class="items-editor-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Description</th>
+                                            <th class="width-qty">Quantity</th>
+                                            <th class="width-price">Unit Price</th>
+                                            <th class="width-total">Total</th>
+                                            <th class="width-action"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="items-table-body">
+                                        <!-- Line items will be added here via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Discount / Adjustments -->
+                    <div class="form-card" id="card-discount">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fa-solid fa-percent"></i></div>
+                            <h2>Discount / Adjustments</h2>
+                            <button type="button" class="btn-section-toggle" id="toggle-section-discount" title="Toggle discount on bill">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="invoice-discount-type">Discount Type</label>
+                                    <select id="invoice-discount-type">
+                                        <option value="percentage">Percentage (%)</option>
+                                        <option value="flat">Flat Amount (₹)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="invoice-discount-value">Discount Value</label>
+                                    <input type="number" id="invoice-discount-value" min="0" step="any" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Notes & Terms -->
+                    <div class="form-card" id="card-notes">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fa-solid fa-file-lines"></i></div>
+                            <h2>Notes & Terms</h2>
+                            <button type="button" class="btn-section-toggle" id="toggle-section-notes" title="Toggle notes on bill">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="invoice-notes">Notes / Terms (Optional)</label>
+                                <textarea id="invoice-notes" rows="2"
+                                    placeholder="e.g., Thank you for your business. Payment is expected within due date."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Signature Block -->
+                    <div class="form-card" id="card-signature">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fa-solid fa-signature"></i></div>
+                            <h2>Signature Section</h2>
+                            <button type="button" class="btn-section-toggle" id="toggle-section-signature" title="Toggle signature line on bill">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-desc">Toggle the eye icon in the header to show or hide the Signature Line block on the invoice.</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Pane: Live PDF Preview -->
+        <section id="preview-pane" class="preview-pane">
+            <div class="pane-content">
+                <!-- Preview Toolbar -->
+                <div class="preview-toolbar">
+                    <span class="preview-status"><span class="pulse-dot"></span> Live Preview (A4 Page)</span>
+                    <div class="preview-actions">
+                        <button id="btn-print" class="btn btn-secondary">
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                        <button id="btn-generate-pdf" class="btn btn-primary">
+                            <i class="fa-solid fa-download"></i> Download PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- A4 Aspect Ratio Container for scaling -->
+                <div class="preview-page-container">
+                    <div class="preview-zoom-wrapper">
+                        <!-- Actual A4 Document target for html2pdf -->
+                        <div id="invoice-document" class="invoice-document">
+
+                            <!-- Invoice Header Details -->
+                            <div class="invoice-doc-header">
+                                <div class="doc-header-left">
+
+                                    <div class="doc-company-details">
+                                        <h3 id="preview-business-name">REJU CABLE TV NETWORK</h3>
+                                        <p id="preview-business-address" class="multi-line">AGRAHARAM NALLEPILLY PO
+                                            PLAKAKKAD,PIN:678553</p>
+                                        <div id="preview-business-contact-block">
+                                            <p id="preview-business-phone-row"><span class="label-dim">Phone:</span> <span id="preview-business-phone"></span></p>
+                                            <p id="preview-business-email-row"><span class="label-dim">Email:</span> <span
+                                                    id="preview-business-email">accounts@apex.com</span></p>
+                                            <p id="preview-business-gstin-row"><span class="label-dim">GSTIN:</span> <span
+                                                    id="preview-business-gstin">27AAAAA1111A1Z1</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="doc-header-right" id="preview-date-section">
+                                    <div class="invoice-badge">INVOICE</div>
+                                    <div class="doc-invoice-meta">
+                                         <p><span class="label-dim">Date:</span> <span
+                                                id="preview-invoice-date">06-07-2026</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="invoice-divider"></div>
+
+                            <!-- Invoice Bill To -->
+                            <div class="invoice-doc-billing" id="preview-customer-section">
+                                <div class="billing-box">
+                                    <h4>Bill To:</h4>
+                                    <h3 id="preview-customer-name">Rohan Sharma</h3>
+                                    <p id="preview-customer-address" class="multi-line">Flat 4B, Greenfield Apartments,
+                                        Sector 12, Pune</p>
+                                    <p id="preview-customer-phone-row"><span class="label-dim">Phone:</span> <span id="preview-customer-phone"></span></p>
+                                    <p id="preview-customer-gstin-row"><span class="label-dim">GSTIN:</span> <span
+                                            id="preview-customer-gstin">27BBBBB2222B2Z2</span></p>
+                                </div>
+                            </div>
+
+                            <!-- Invoice Items Table -->
+                            <table class="invoice-doc-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-index">S.No.</th>
+                                        <th class="col-desc">Particulars</th>
+                                        <th class="col-qty text-right">Qty</th>
+                                        <th class="col-total text-right">Amount (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="preview-items-body">
+                                    <!-- Dynamic rows from JS -->
+                                </tbody>
+                                <tfoot>
+                                    <tr id="preview-discount-row" class="table-summary-row hidden">
+                                        <td colspan="3" class="text-right">Discount <span id="preview-discount-label"></span>:</td>
+                                        <td class="text-right" id="preview-discount">-₹0.00</td>
+                                    </tr>
+                                    <tr class="table-grand-total-row">
+                                        <td colspan="3" class="text-right">Grand Total:</td>
+                                        <td class="text-right" id="preview-grand-total">₹0.00</td>
+                                    </tr>
+                                    <tr class="table-amount-words-row">
+                                        <td colspan="4" class="text-left">
+                                            <span class="amount-words-label">Amount in Words:</span>
+                                            <span id="preview-amount-words" class="amount-words-value">Rupees Zero Only</span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <!-- Notes Summary -->
+                            <div class="invoice-doc-summary-section" id="preview-notes-section">
+                                <div class="doc-notes-box">
+                                    <h4 id="preview-notes-title">Notes & Terms</h4>
+                                    <p id="preview-notes" class="multi-line">Thank you for your business. Payment is
+                                        expected within the due date.</p>
+                                </div>
+                            </div>
+
+                            <!-- Signature Area -->
+                            <div class="invoice-signature-area" id="preview-signature-section">
+                                <div class="signature-wrapper">
+                                    <div class="signature-space"></div>
+                                    <div class="signature-line"></div>
+                                    <p class="signature-label">Signature</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Scroll to Top/Bottom Controls -->
+            <div id="preview-scroll-controls" class="preview-scroll-controls hidden">
+                <button id="btn-scroll-up" class="btn-scroll-action" title="Scroll to Top">
+                    <i class="fa-solid fa-chevron-up"></i>
+                </button>
+                <button id="btn-scroll-down" class="btn-scroll-action" title="Scroll to Bottom">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+    </div> <!-- End of app-container -->
+
+    <!-- Custom Script -->
+    <script src="app.js"></script>
+</body>
+
+</html>
